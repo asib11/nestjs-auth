@@ -13,7 +13,7 @@ export class AuthService {
 
   async signupLocal(dto: AuthDto): Promise<Tokens> {
     const hash = await this.hashData(dto.password);
-    const newUser = this.prisma.user.create({
+    const newUser = await this.prisma.user.create({
       data: {
         email: dto.email,
         hash,
