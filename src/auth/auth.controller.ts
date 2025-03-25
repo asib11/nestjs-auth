@@ -8,8 +8,8 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('/local/singup')
-  singupLocal(@Body() dto: AuthDto):Promise<Tokens> {
-    this.authService.signupLocal(dto);
+  singupLocal(@Body() dto: AuthDto): Promise<Tokens> {
+    return this.authService.signupLocal(dto);
   }
 
   @Post('/local/singin')
