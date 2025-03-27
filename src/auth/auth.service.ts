@@ -11,6 +11,48 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
   ) {}
+
+  async signupLocal(dto: AuthDto): Promise<Tokens> {
+    const hash = await this.hashData(dto.password);
+    const newUser = await this.prisma.user.create({
+      data: {
+        email: dto.email,
+        hash,
+      },
+    });
+    const tokens = await this.getTokens(newUser.id, newUser.email);
+    await this.updateRtHash(newUser.id, tokens.refreshToken);
+    return tokens;
+  }
+
+  async signinLocal(dto: AuthDto) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: dto.email,
+      },
+    });
+    if (!user) throw new Error('Access denied');
+    const passwordMatches = await bcrypt.compare(dto.password, user.hash);
+    if (!passwordMatches) throw new Error('Access denied');
+    const tokens = await this.getTokens(user.id, user.email);
+    await this.updateRtHash(user.id, tokens.refreshToken);
+    return tokens;
+  }
+  logout() {}
+  refreshTokens() {}
+
+  async updateRtHash(userId: number, rt: string) {
+    const hash = await this.hashData(rt);
+    await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        hashedRt: hash,
+      },
+    });
+  }
+
   hashData(data: string) {
     return bcrypt.hash(data, 10);
   }
@@ -40,33 +82,4 @@ export class AuthService {
     ]);
     return { accessToken: at, refreshToken: rt };
   }
-
-  async signupLocal(dto: AuthDto): Promise<Tokens> {
-    const hash = await this.hashData(dto.password);
-    const newUser = await this.prisma.user.create({
-      data: {
-        email: dto.email,
-        hash,
-      },
-    });
-    const tokens = await this.getTokens(newUser.id, newUser.email);
-    await this.updateRtHash(newUser.id, tokens.refreshToken);
-    return tokens;
-  }
-
-  async updateRtHash(userId: number, rt: string) {
-    const hash = await this.hashData(rt);
-    await this.prisma.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        hashedRt: hash,
-      },
-    });
-  }
-
-  signinLocal() {}
-  logout() {}
-  refreshTokens() {}
 }
