@@ -50,9 +50,22 @@ export class AuthService {
       },
     });
     const tokens = await this.getTokens(newUser.id, newUser.email);
-
+    await this.updateRtHash(newUser.id, tokens.refreshToken);
     return tokens;
   }
+
+  async updateRtHash(userId: number, rt: string) {
+    const hash = await this.hashData(rt);
+    await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        hashedRt: hash,
+      },
+    });
+  }
+
   signinLocal() {}
   logout() {}
   refreshTokens() {}
