@@ -19,11 +19,11 @@ export class AuthController {
 
   @Post('/logout')
   logout() {
-    this.authService.logout();
+    return this.authService.logout();
   }
 
   @Post('/refresh')
   refreshTokens() {
-    this.authService.refreshTokens();
+    return this.authService.refreshTokens();
   }
 }
