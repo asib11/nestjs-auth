@@ -17,13 +17,13 @@ import { Request } from 'express';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @Post('local/singup')
+  @Post('local/signup')
   @HttpCode(HttpStatus.CREATED)
   singupLocal(@Body() dto: AuthDto): Promise<Tokens> {
     return this.authService.signupLocal(dto);
   }
 
-  @Post('local/singin')
+  @Post('local/signin')
   @HttpCode(HttpStatus.OK)
   singinLocal(@Body() dto: AuthDto): Promise<Tokens> {
     return this.authService.signinLocal(dto);
@@ -40,7 +40,10 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt-refresh'))
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  refreshTokens() {
-    return this.authService.refreshTokens();
+  refreshTokens(
+    @Req() req: Request & { user: { sub: number; refreshToken: string } },
+  ) {
+    const user = req.user;
+    return this.authService.refreshTokens(user.sub, user.refreshToken);
   }
 }
