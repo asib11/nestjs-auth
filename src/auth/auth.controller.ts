@@ -12,17 +12,19 @@ import { AuthDto } from './dto';
 import { Tokens } from './types';
 import { Request } from 'express';
 import { AtGuard, RtGuard } from 'src/common/decorators/guards';
+import { Public } from 'src/common/decorators';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
-
+  @Public()
   @Post('local/signup')
   @HttpCode(HttpStatus.CREATED)
   singupLocal(@Body() dto: AuthDto): Promise<Tokens> {
     return this.authService.signupLocal(dto);
   }
 
+  @Public()
   @Post('local/signin')
   @HttpCode(HttpStatus.OK)
   singinLocal(@Body() dto: AuthDto): Promise<Tokens> {
